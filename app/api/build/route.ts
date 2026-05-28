@@ -35,10 +35,16 @@ export async function POST(req: NextRequest) {
         break
       }
       case 'linkedin': {
-        if (!body.linkedin_text?.trim()) {
-          return NextResponse.json({ error: 'linkedin_text required for linkedin mode.' }, { status: 400 })
+        const { linkedin_text, linkedin_paste, linkedin_pdf_text, linkedin_profile, linkedin_posts } = body
+        const hasAny = linkedin_text?.trim() || linkedin_paste?.trim() || linkedin_pdf_text?.trim() || linkedin_profile?.trim()
+        if (!hasAny) {
+          return NextResponse.json({ error: 'At least one LinkedIn data source required.' }, { status: 400 })
         }
-        messages = buildLinkedinMessages(body.linkedin_text)
+        messages = buildLinkedinMessages(
+          linkedin_text
+            ? linkedin_text
+            : { pasteText: linkedin_paste, pdfText: linkedin_pdf_text, scrapedProfile: linkedin_profile, scrapedPosts: linkedin_posts }
+        )
         break
       }
       case 'suggest': {

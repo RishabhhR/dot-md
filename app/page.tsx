@@ -1,54 +1,6 @@
 import Link from 'next/link'
-
-const MOCK_DIMENSIONS = [
-  { name: 'Identity & Role', score: 8, max: 10 },
-  { name: 'Technical Context', score: 11, max: 15 },
-  { name: 'Communication Style', score: 6, max: 15 },
-  { name: 'Constraints & Boundaries', score: 2, max: 10 },
-]
-
-function MockScoreCard() {
-  return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <div className="text-5xl font-bold text-zinc-50">72</div>
-          <div className="text-zinc-500 text-sm mt-1">out of 100</div>
-        </div>
-        <div className="text-right">
-          <span className="inline-block bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-medium px-3 py-1 rounded-full">
-            Proficient
-          </span>
-          <div className="text-zinc-500 text-xs mt-2">3 areas to improve</div>
-        </div>
-      </div>
-      <div className="space-y-3">
-        {MOCK_DIMENSIONS.map((d) => {
-          const pct = d.score / d.max
-          const barColor =
-            pct >= 0.86 ? 'bg-emerald-500' : pct >= 0.66 ? 'bg-violet-500' : pct >= 0.41 ? 'bg-amber-500' : 'bg-red-500'
-          return (
-            <div key={d.name}>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-zinc-400">{d.name}</span>
-                <span className="text-zinc-500">
-                  {d.score}/{d.max}
-                </span>
-              </div>
-              <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${barColor}`}
-                  style={{ width: `${pct * 100}%` }}
-                />
-              </div>
-            </div>
-          )
-        })}
-        <div className="text-zinc-600 text-xs pt-1">+ 4 more dimensions…</div>
-      </div>
-    </div>
-  )
-}
+import { Show, SignInButton, UserButton } from '@clerk/nextjs'
+import { HomeScoreCard } from '@/components/HomeScoreCard'
 
 export default function Home() {
   return (
@@ -64,19 +16,28 @@ export default function Home() {
             <Link href="/build" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">
               Build
             </Link>
-            <Link
-              href="/score"
-              className="text-sm bg-violet-600 hover:bg-violet-500 text-white px-4 py-1.5 rounded-lg transition-colors"
-            >
-              Get Started
-            </Link>
+            <Show when="signed-in">
+              <Link href="/history" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">
+                History
+              </Link>
+            </Show>
+            <Show when="signed-out">
+              <SignInButton mode="modal">
+                <button className="text-sm bg-violet-600 hover:bg-violet-500 text-white px-4 py-1.5 rounded-lg transition-colors cursor-pointer">
+                  Get Started
+                </button>
+              </SignInButton>
+            </Show>
+            <Show when="signed-in">
+              <UserButton />
+            </Show>
           </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-6 pt-24 pb-20">
-        <div className="flex flex-col lg:flex-row items-center gap-16">
+      <section className="max-w-6xl mx-auto px-6 pt-12 lg:pt-24 pb-12 lg:pb-20">
+        <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
           <div className="flex-1 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 rounded-full px-4 py-1.5 text-xs text-violet-400 mb-8">
               The future of AI productivity starts with context
@@ -106,8 +67,8 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="flex-shrink-0">
-            <MockScoreCard />
+          <div className="flex-shrink-0 w-full max-w-sm mx-auto lg:mx-0">
+            <HomeScoreCard />
           </div>
         </div>
       </section>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { Show, SignInButton, UserButton } from '@clerk/nextjs'
 import type { ScoreResult, ScoreDimension, OptimizeResult, OptimizeChange } from '@/lib/types'
 import { useVoiceRecorder, formatTime } from '@/hooks/useVoiceRecorder'
 
@@ -169,6 +170,27 @@ export default function ScorePage() {
       setScoreResult(data)
       setPhase('scored')
       setTimeout(() => setAnimate(true), 50)
+      // Persist for homepage card
+      try {
+        localStorage.setItem('contextual_labs_last_score', JSON.stringify({
+          overall: data.overall,
+          grade: data.grade,
+          dimensions: (data.dimensions ?? []).slice(0, 4).map((d: { name: string; score: number; max: number }) => ({ name: d.name, score: d.score, max: d.max })),
+          improvements: data.top_improvements?.length ?? 0,
+        }))
+      } catch { /* ignore */ }
+      // Save to DB (non-blocking)
+      fetch('/api/history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: finalContent,
+          overall_score: data.overall,
+          grade: data.grade,
+          score_json: data,
+          source: inputMode,
+        }),
+      }).catch(() => {})
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setPhase('input')
@@ -184,12 +206,22 @@ export default function ScorePage() {
       const res = await fetch('/api/optimize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, current_score: scoreResult?.overall }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Optimization failed')
       setOptimizeResult(data)
       setPhase('optimized')
+      // Save optimized file to DB (non-blocking)
+      fetch('/api/history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: data.markdown,
+          source: 'optimized',
+          label: `Optimized · ${scoreResult?.overall ?? data.score_before} → ${data.score_after}`,
+        }),
+      }).catch(() => {})
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setPhase('scored')
@@ -229,9 +261,24 @@ export default function ScorePage() {
           <Link href="/" className="text-sm font-semibold text-violet-400 tracking-wide">
             Contextual Labs
           </Link>
-          <Link href="/build" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">
-            Build a file instead →
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/history" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">
+              History
+            </Link>
+            <Link href="/build" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">
+              Build a file instead →
+            </Link>
+            <Show when="signed-out">
+              <SignInButton mode="modal">
+                <button className="text-sm bg-violet-600 hover:bg-violet-500 text-white px-4 py-1.5 rounded-lg transition-colors cursor-pointer">
+                  Sign in
+                </button>
+              </SignInButton>
+            </Show>
+            <Show when="signed-in">
+              <UserButton />
+            </Show>
+          </div>
         </div>
       </nav>
 

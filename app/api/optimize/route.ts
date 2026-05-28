@@ -5,7 +5,7 @@ import type { OptimizeResult } from '@/lib/types'
 
 export async function POST(req: NextRequest) {
   try {
-    const { content } = await req.json()
+    const { content, current_score } = await req.json()
     if (!content || typeof content !== 'string' || content.trim().length < 10) {
       return NextResponse.json({ error: 'Content is required (min 10 chars).' }, { status: 400 })
     }
@@ -15,11 +15,16 @@ export async function POST(req: NextRequest) {
     const fallback: OptimizeResult = {
       markdown: content,
       changes: [],
-      score_before: 0,
+      score_before: current_score ?? 0,
       score_after: 0,
     }
 
     const result = parseJSON<OptimizeResult>(raw, fallback)
+
+    // Always use the real score we measured — never trust the LLM's guess
+    if (typeof current_score === 'number') {
+      result.score_before = current_score
+    }
 
     return NextResponse.json({ ...result, warning })
   } catch (err) {

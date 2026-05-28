@@ -96,7 +96,35 @@ Return JSON:
   ]
 }
 
-export function buildLinkedinMessages(linkedinText: string): Message[] {
+export interface LinkedInData {
+  pasteText?: string
+  pdfText?: string
+  scrapedProfile?: string
+  scrapedPosts?: string
+}
+
+export function buildLinkedinMessages(data: LinkedInData | string): Message[] {
+  // Accept legacy string or new object
+  let context = ''
+  let hasPosts = false
+
+  if (typeof data === 'string') {
+    context = `<linkedin_data>\n${data.slice(0, 6000)}\n</linkedin_data>`
+  } else {
+    const parts: string[] = []
+    if (data.pasteText?.trim())
+      parts.push(`<pasted_text>\n${data.pasteText.slice(0, 4000)}\n</pasted_text>`)
+    if (data.pdfText?.trim())
+      parts.push(`<pdf_profile>\n${data.pdfText.slice(0, 5000)}\n</pdf_profile>`)
+    if (data.scrapedProfile?.trim())
+      parts.push(`<scraped_profile>\n${data.scrapedProfile.slice(0, 4000)}\n</scraped_profile>`)
+    if (data.scrapedPosts?.trim()) {
+      parts.push(`<recent_posts>\n${data.scrapedPosts.slice(0, 3000)}\n</recent_posts>`)
+      hasPosts = true
+    }
+    context = parts.join('\n\n')
+  }
+
   return [
     {
       role: 'system',
@@ -106,15 +134,17 @@ export function buildLinkedinMessages(linkedinText: string): Message[] {
     },
     {
       role: 'user',
-      content: `Convert this LinkedIn profile into a comprehensive CLAUDE.md context file:
+      content: `Convert this LinkedIn data into a comprehensive CLAUDE.md context file:
 
-<linkedin_profile>
-${linkedinText.slice(0, 6000)}
-</linkedin_profile>
+${context}
 
 Extract: role, tech stack, domain expertise, industry context, seniority level.
-Infer communication preferences and work patterns from the career trajectory.
-Add placeholder sections with instructions for the user to fill in constraints and collaboration preferences.
+Infer communication preferences and work patterns from the career trajectory.${
+        hasPosts
+          ? '\nUse the recent posts to infer their writing voice, preferred tone, and communication style — reflect this in the Communication Style section.'
+          : ''
+      }
+Add placeholder sections with clear instructions for the user to fill in constraints and collaboration preferences.
 
 Return JSON:
 {"markdown": "<complete markdown file content>"}`,

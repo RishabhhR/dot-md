@@ -19,7 +19,13 @@ export interface BuildRequest {
   answers?: Record<string, string>
   step?: string
   transcript?: string
+  // legacy single-field (kept for backward compat)
   linkedin_text?: string
+  // new multi-source fields
+  linkedin_paste?: string
+  linkedin_pdf_text?: string
+  linkedin_profile?: string
+  linkedin_posts?: string
 }
 
 export interface BuildResult {
