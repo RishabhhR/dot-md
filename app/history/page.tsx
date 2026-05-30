@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { UserButton } from '@clerk/nextjs'
+import { Logo } from '@/components/Logo'
 
 interface MdFile {
   id: string
@@ -160,8 +161,9 @@ export default function HistoryPage() {
       {/* Nav */}
       <nav className="border-b border-zinc-900 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/" className="text-sm font-semibold text-violet-400 tracking-wide">
-            Contextual Labs
+          <Link href="/" className="flex items-center gap-2 group">
+            <Logo size={28} />
+            <span className="text-sm font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">Contextual Labs</span>
           </Link>
           <div className="flex items-center gap-5">
             <Link href="/score" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">Score</Link>

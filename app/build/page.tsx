@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Show, SignInButton, UserButton } from '@clerk/nextjs'
+import { Logo } from '@/components/Logo'
 import { useVoiceRecorder, formatTime } from '@/hooks/useVoiceRecorder'
 
 type BuildPhase = 'mode' | 'guided' | 'voice' | 'linkedin' | 'generating' | 'result'
@@ -290,8 +291,9 @@ export default function BuildPage() {
       {/* Nav */}
       <nav className="border-b border-zinc-900 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/" className="text-sm font-semibold text-violet-400 tracking-wide">
-            Contextual Labs
+          <Link href="/" className="flex items-center gap-2 group">
+            <Logo size={28} />
+            <span className="text-sm font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">Contextual Labs</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/history" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">

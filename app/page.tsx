@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Show, SignInButton, UserButton } from '@clerk/nextjs'
 import { HomeScoreCard } from '@/components/HomeScoreCard'
+import { Logo } from '@/components/Logo'
 
 export default function Home() {
   return (
@@ -8,7 +9,10 @@ export default function Home() {
       {/* Nav */}
       <nav className="border-b border-zinc-900 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <span className="text-sm font-semibold text-violet-400 tracking-wide">Contextual Labs</span>
+          <Link href="/" className="flex items-center gap-2 group">
+            <Logo size={28} />
+            <span className="text-sm font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">Contextual Labs</span>
+          </Link>
           <div className="flex items-center gap-6">
             <Link href="/score" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">
               Score
