@@ -193,6 +193,36 @@ Return JSON:
   ]
 }
 
+export function chatGptFormatMessages(content: string): Message[] {
+  return [
+    {
+      role: 'system',
+      content:
+        'You reformat professional context files (CLAUDE.md) into ChatGPT Custom Instructions. ' +
+        'ChatGPT has two fields with a combined 1,500 character limit. Return ONLY valid JSON.',
+    },
+    {
+      role: 'user',
+      content: `Convert this context file into ChatGPT Custom Instructions format.
+
+ChatGPT has two fields:
+1. "What would you like ChatGPT to know about you?" — background, role, expertise, values (max ~750 chars)
+2. "How would you like ChatGPT to respond?" — tone, format, constraints, style (max ~750 chars)
+
+Be concise. Cut fluff but keep the most distinctive and actionable facts. No markdown headers in output.
+
+Context file:
+${content.slice(0, 6000)}
+
+Return JSON:
+{
+  "about": "<plain text for field 1, max 750 chars>",
+  "respond": "<plain text for field 2, max 750 chars>"
+}`,
+    },
+  ]
+}
+
 export function detectDomainMessages(content: string): Message[] {
   return [
     {

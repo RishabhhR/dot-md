@@ -204,6 +204,8 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [profileUrl, setProfileUrl] = useState<string | null>(null)
+  const [profileCopied, setProfileCopied] = useState(false)
 
   useEffect(() => {
     fetch('/api/history')
@@ -212,6 +214,9 @@ export default function HistoryPage() {
         if (d.error) throw new Error(d.error)
         setFiles(d.files ?? [])
         setTests(d.tests ?? [])
+        if (d.username) {
+          setProfileUrl(`${window.location.origin}/u/${d.username}`)
+        }
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
@@ -239,10 +244,30 @@ export default function HistoryPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="mb-10">
-          <h1 className="text-3xl font-bold mb-2">Your History</h1>
-          <p className="text-zinc-400 text-sm">
-            Every context file you&apos;ve scored or built — your progress over time.
-          </p>
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Your History</h1>
+              <p className="text-zinc-400 text-sm">
+                Every context file you&apos;ve scored or built — your progress over time.
+              </p>
+            </div>
+
+            {/* Share profile */}
+            {profileUrl && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 flex items-center gap-3 flex-shrink-0">
+                <div className="text-xs text-zinc-400 truncate max-w-44 hidden sm:block">{profileUrl.replace('https://', '')}</div>
+                <Link href={profileUrl} target="_blank" className="text-xs text-violet-400 hover:text-violet-300 transition-colors flex-shrink-0">
+                  View →
+                </Link>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(profileUrl); setProfileCopied(true); setTimeout(() => setProfileCopied(false), 2000) }}
+                  className="text-xs bg-violet-600 hover:bg-violet-500 text-white px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+                >
+                  {profileCopied ? '✓ Copied' : 'Share'}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {loading && (

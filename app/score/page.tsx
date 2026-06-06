@@ -490,8 +490,13 @@ export default function ScorePage() {
                 href="/test"
                 className="flex items-center justify-center gap-2 border border-violet-500/40 hover:border-violet-500/70 text-violet-400 hover:text-violet-300 px-5 py-3 rounded-xl font-medium transition-colors"
               >
-                <span>Test how AI sees you</span>
-                <span>→</span>
+                Test how AI sees you →
+              </Link>
+              <Link
+                href="/use"
+                className="flex items-center justify-center gap-2 border border-zinc-700 hover:border-zinc-600 text-zinc-400 hover:text-zinc-200 px-5 py-3 rounded-xl font-medium transition-colors"
+              >
+                Use your file →
               </Link>
               <button
                 onClick={reset}

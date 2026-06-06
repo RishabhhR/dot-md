@@ -4,6 +4,7 @@ import {
   initDb, upsertUser,
   saveMdFile, getUserHistory,
   saveTestResult, updateTestRating, getUserTestResults,
+  getUsernameForUser,
 } from '@/lib/db'
 
 export const maxDuration = 30
@@ -15,12 +16,13 @@ export async function GET() {
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     await initDb()
-    const [files, tests] = await Promise.all([
+    const [files, tests, username] = await Promise.all([
       getUserHistory(userId),
       getUserTestResults(userId),
+      getUsernameForUser(userId),
     ])
 
-    return NextResponse.json({ files, tests })
+    return NextResponse.json({ files, tests, username })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     return NextResponse.json({ error: message }, { status: 500 })

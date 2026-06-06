@@ -9,6 +9,8 @@
     "app/api/linkedin-scrape/route.ts": { "maxDuration": 30 },
     "app/api/history/route.ts": { "maxDuration": 30 },
     "app/api/detect-domain/route.ts": { "maxDuration": 30 },
-    "app/api/test/route.ts": { "maxDuration": 60 }
+    "app/api/test/route.ts": { "maxDuration": 60 },
+    "app/api/format-for-tool/route.ts": { "maxDuration": 30 },
+    "app/api/profile/[username]/route.ts": { "maxDuration": 15 }
   }
 }
