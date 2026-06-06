@@ -16,6 +16,17 @@ interface MdFile {
   created_at: number
 }
 
+interface TestResult {
+  id: string
+  prompt: string
+  task_label: string | null
+  detected_domain: string | null
+  response_generic: string
+  response_with_ctx: string
+  rating: number | null
+  created_at: number
+}
+
 function gradeColors(grade: string | null) {
   switch (grade) {
     case 'Expert':     return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
@@ -135,9 +146,61 @@ function ProgressionChart({ files }: { files: MdFile[] }) {
   )
 }
 
+// ── Test results section ──────────────────────────────────────────────
+function TestCard({ test }: { test: TestResult }) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+      <div className="px-5 py-4 flex items-start gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-1">
+            {test.detected_domain && (
+              <span className="text-xs bg-violet-500/10 border border-violet-500/20 text-violet-400 px-2.5 py-0.5 rounded-full">
+                {test.detected_domain}
+              </span>
+            )}
+            {test.task_label && (
+              <span className="text-xs text-zinc-400 font-medium">{test.task_label}</span>
+            )}
+            {test.rating === 1 && (
+              <span className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">👍 Nailed it</span>
+            )}
+            {test.rating === -1 && (
+              <span className="text-xs bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full">👎 Not quite</span>
+            )}
+          </div>
+          <p className="text-xs text-zinc-500 truncate italic">&ldquo;{test.prompt}&rdquo;</p>
+          <div className="text-xs text-zinc-700 mt-1">{formatDate(test.created_at)}</div>
+        </div>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-zinc-800 flex-shrink-0"
+        >
+          {expanded ? 'Hide ↑' : 'View ↓'}
+        </button>
+      </div>
+
+      {expanded && (
+        <div className="border-t border-zinc-800 p-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div>
+            <p className="text-xs font-medium text-zinc-600 uppercase tracking-wide mb-2">Generic AI</p>
+            <p className="text-xs text-zinc-400 leading-relaxed whitespace-pre-wrap">{test.response_generic}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-violet-500 uppercase tracking-wide mb-2">With your context</p>
+            <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-wrap">{test.response_with_ctx}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main page ─────────────────────────────────────────────────────────
 export default function HistoryPage() {
   const [files, setFiles] = useState<MdFile[]>([])
+  const [tests, setTests] = useState<TestResult[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
@@ -148,6 +211,7 @@ export default function HistoryPage() {
       .then((d) => {
         if (d.error) throw new Error(d.error)
         setFiles(d.files ?? [])
+        setTests(d.tests ?? [])
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
@@ -193,7 +257,7 @@ export default function HistoryPage() {
           </div>
         )}
 
-        {!loading && !error && files.length === 0 && (
+        {!loading && !error && files.length === 0 && tests.length === 0 && (
           <div className="text-center py-24">
             <div className="text-4xl mb-4">📄</div>
             <p className="text-zinc-400 mb-6">No files yet. Score or build your first context file.</p>
@@ -208,19 +272,20 @@ export default function HistoryPage() {
           </div>
         )}
 
-        {!loading && !error && files.length > 0 && (
+        {!loading && !error && (files.length > 0 || tests.length > 0) && (
           <>
             {/* Stats row */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-4 gap-4 mb-8">
               {[
                 { label: 'Total files', value: files.length },
                 { label: 'Scored', value: scoredFiles.length },
                 {
-                  label: scoredFiles.length > 0 ? 'Best score' : 'Best score',
+                  label: 'Best score',
                   value: scoredFiles.length > 0
                     ? Math.max(...scoredFiles.map((f) => f.overall_score as number))
                     : '—',
                 },
+                { label: 'Tests run', value: tests.length },
               ].map((s) => (
                 <div key={s.label} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
                   <div className="text-2xl font-bold text-zinc-50">{s.value}</div>
@@ -239,7 +304,27 @@ export default function HistoryPage() {
               </div>
             )}
 
+            {/* Tests section */}
+            {tests.length > 0 && (
+              <div className="mb-10">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-sm font-semibold text-zinc-300 uppercase tracking-wide">Test Runs</h2>
+                  <Link href="/test" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                    Run another test →
+                  </Link>
+                </div>
+                <div className="space-y-3">
+                  {tests.map((test) => <TestCard key={test.id} test={test} />)}
+                </div>
+              </div>
+            )}
+
             {/* File list */}
+            {files.length > 0 && (
+            <div className="mb-4">
+              <h2 className="text-sm font-semibold text-zinc-300 uppercase tracking-wide mb-4">Context Files</h2>
+            </div>
+            )}
             <div className="space-y-3">
               {files.map((file) => (
                 <div key={file.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">

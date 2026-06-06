@@ -38,6 +38,21 @@ export async function initDb() {
 
     CREATE INDEX IF NOT EXISTS idx_md_files_user_id ON md_files(user_id);
     CREATE INDEX IF NOT EXISTS idx_md_files_created_at ON md_files(user_id, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS test_results (
+      id                TEXT PRIMARY KEY,
+      user_id           TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      md_file_id        TEXT,
+      prompt            TEXT NOT NULL,
+      task_label        TEXT,
+      detected_domain   TEXT,
+      response_generic  TEXT NOT NULL,
+      response_with_ctx TEXT NOT NULL,
+      rating            INTEGER,
+      created_at        INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_test_results_user ON test_results(user_id, created_at DESC);
   `)
 }
 
@@ -111,4 +126,67 @@ export async function getUserHistory(userId: string): Promise<DbMdFile[]> {
     args: [userId],
   })
   return result.rows as unknown as DbMdFile[]
+}
+
+// ── Test results ──────────────────────────────────────────────────────
+
+export interface DbTestResult {
+  id: string
+  user_id: string
+  md_file_id: string | null
+  prompt: string
+  task_label: string | null
+  detected_domain: string | null
+  response_generic: string
+  response_with_ctx: string
+  rating: number | null  // 1 = thumbs up, -1 = thumbs down
+  created_at: number
+}
+
+export async function saveTestResult(entry: {
+  userId: string
+  mdFileId?: string
+  prompt: string
+  taskLabel?: string
+  detectedDomain?: string
+  responseGeneric: string
+  responseWithCtx: string
+  rating?: number
+}): Promise<string> {
+  const db = getDb()
+  const id = crypto.randomUUID()
+  await db.execute({
+    sql: `INSERT INTO test_results
+            (id, user_id, md_file_id, prompt, task_label, detected_domain, response_generic, response_with_ctx, rating)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      id,
+      entry.userId,
+      entry.mdFileId ?? null,
+      entry.prompt,
+      entry.taskLabel ?? null,
+      entry.detectedDomain ?? null,
+      entry.responseGeneric,
+      entry.responseWithCtx,
+      entry.rating ?? null,
+    ],
+  })
+  return id
+}
+
+export async function updateTestRating(id: string, userId: string, rating: number): Promise<void> {
+  const db = getDb()
+  await db.execute({
+    sql: `UPDATE test_results SET rating = ? WHERE id = ? AND user_id = ?`,
+    args: [rating, id, userId],
+  })
+}
+
+export async function getUserTestResults(userId: string): Promise<DbTestResult[]> {
+  const db = getDb()
+  const result = await db.execute({
+    sql: `SELECT * FROM test_results WHERE user_id = ? ORDER BY created_at DESC LIMIT 50`,
+    args: [userId],
+  })
+  return result.rows as unknown as DbTestResult[]
 }

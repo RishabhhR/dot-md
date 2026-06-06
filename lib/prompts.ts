@@ -193,6 +193,35 @@ Return JSON:
   ]
 }
 
+export function detectDomainMessages(content: string): Message[] {
+  return [
+    {
+      role: 'system',
+      content:
+        'You analyze professional AI context files (CLAUDE.md) to extract the user\'s domain and generate tailored test prompts. Return ONLY valid JSON.',
+    },
+    {
+      role: 'user',
+      content: `Analyze this context file and return JSON in exactly this shape:
+{
+  "domain": "concise domain name, e.g. 'iOS Development', 'Product Management', 'Data Science', 'UX Design'",
+  "description": "one sentence about what this person does and their distinctive style",
+  "prompts": [
+    { "label": "3-5 word label", "prompt": "A specific task prompt that would reveal this person's unique perspective and voice. Written as a direct instruction, e.g. 'Write a LinkedIn post sharing my take on the biggest misconception in [their field]'" },
+    { "label": "...", "prompt": "..." },
+    { "label": "...", "prompt": "..." },
+    { "label": "...", "prompt": "..." }
+  ]
+}
+
+Generate exactly 4 prompts specific to their domain, values, and communication style. Choose tasks where a personalized AI (one that knows their context file) will produce a noticeably different and better result than a generic AI — revealing the real value of a great context file.
+
+Context file:
+${content.slice(0, 6000)}`,
+    },
+  ]
+}
+
 export function optimizeMessages(content: string): Message[] {
   return [
     {

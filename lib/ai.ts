@@ -113,6 +113,42 @@ export async function callLLM(messages: Message[]): Promise<{ content: string; p
   throw new Error('All LLM providers are unavailable. Check your API keys.')
 }
 
+// Free-form (non-JSON) call — for the A/B test responses
+// systemPrompt = null → no system message (generic mode)
+// systemPrompt = string → CLAUDE.md as system (contextualized mode)
+export async function callGroqFreeform(
+  systemPrompt: string | null,
+  userPrompt: string,
+  timeoutMs = 30000
+): Promise<string> {
+  const apiKey = process.env.GROQ_API_KEY
+  const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+  if (!apiKey) throw new Error('GROQ_API_KEY not set')
+
+  const messages: Message[] = []
+  if (systemPrompt) messages.push({ role: 'system', content: systemPrompt })
+  messages.push({ role: 'user', content: userPrompt })
+
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    const res = await fetch(GROQ_URL, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: 800 }),
+    })
+    clearTimeout(timer)
+    if (!res.ok) throw new Error(`Groq HTTP ${res.status}`)
+    const data = await res.json()
+    return data.choices[0].message.content as string
+  } catch (err) {
+    clearTimeout(timer)
+    throw err
+  }
+}
+
 export function parseJSON<T>(content: string, fallback: T): T {
   try {
     return JSON.parse(content) as T

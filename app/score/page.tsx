@@ -171,7 +171,7 @@ export default function ScorePage() {
       setScoreResult(data)
       setPhase('scored')
       setTimeout(() => setAnimate(true), 50)
-      // Persist for homepage card
+      // Persist for homepage card + test page
       try {
         localStorage.setItem('contextual_labs_last_score', JSON.stringify({
           overall: data.overall,
@@ -179,6 +179,7 @@ export default function ScorePage() {
           dimensions: (data.dimensions ?? []).slice(0, 4).map((d: { name: string; score: number; max: number }) => ({ name: d.name, score: d.score, max: d.max })),
           improvements: data.top_improvements?.length ?? 0,
         }))
+        localStorage.setItem('contextual_labs_last_content', finalContent)
       } catch { /* ignore */ }
       // Save to DB (non-blocking)
       fetch('/api/history', {
@@ -478,13 +479,20 @@ export default function ScorePage() {
             )}
 
             {/* Actions */}
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <button
                 onClick={handleOptimize}
                 className="flex-1 bg-violet-600 hover:bg-violet-500 text-white py-3 rounded-xl font-medium transition-colors"
               >
                 Optimize My File ↑
               </button>
+              <Link
+                href="/test"
+                className="flex items-center justify-center gap-2 border border-violet-500/40 hover:border-violet-500/70 text-violet-400 hover:text-violet-300 px-5 py-3 rounded-xl font-medium transition-colors"
+              >
+                <span>Test how AI sees you</span>
+                <span>→</span>
+              </Link>
               <button
                 onClick={reset}
                 className="border border-zinc-700 hover:border-zinc-600 text-zinc-400 hover:text-zinc-200 px-5 py-3 rounded-xl font-medium transition-colors"
