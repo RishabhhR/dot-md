@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
 import { Logo } from '@/components/Logo'
 
@@ -199,6 +200,7 @@ function TestCard({ test }: { test: TestResult }) {
 
 // ── Main page ─────────────────────────────────────────────────────────
 export default function HistoryPage() {
+  const router = useRouter()
   const [files, setFiles] = useState<MdFile[]>([])
   const [tests, setTests] = useState<TestResult[]>([])
   const [loading, setLoading] = useState(true)
@@ -206,6 +208,29 @@ export default function HistoryPage() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [profileUrl, setProfileUrl] = useState<string | null>(null)
   const [profileCopied, setProfileCopied] = useState(false)
+
+  // Load a history file back into the app, then navigate to the target page
+  const loadFile = (file: MdFile, dest: 'score' | 'test' | 'use') => {
+    try {
+      localStorage.setItem('contextual_labs_last_content', file.content)
+      if (file.score_json) {
+        try {
+          const parsed = JSON.parse(file.score_json)
+          localStorage.setItem('contextual_labs_last_score_full', file.score_json)
+          localStorage.setItem('contextual_labs_last_score', JSON.stringify({
+            overall: parsed.overall,
+            grade: parsed.grade,
+            dimensions: (parsed.dimensions ?? []).slice(0, 4).map((d: { name: string; score: number; max: number }) => ({ name: d.name, score: d.score, max: d.max })),
+            improvements: parsed.top_improvements?.length ?? 0,
+          }))
+        } catch { /* ignore */ }
+      }
+    } catch { /* ignore */ }
+
+    if (dest === 'score') router.push('/score?restore=1')
+    else if (dest === 'test') router.push('/test')
+    else router.push('/use')
+  }
 
   useEffect(() => {
     fetch('/api/history')
@@ -376,7 +401,28 @@ export default function HistoryPage() {
                       </div>
                       <div className="text-xs text-zinc-600 mt-1">{formatDate(file.created_at)}</div>
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <button
+                        onClick={() => loadFile(file, 'score')}
+                        className="text-xs text-violet-400 hover:text-violet-300 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-violet-500/10"
+                        title="Open in score view"
+                      >
+                        Open →
+                      </button>
+                      <button
+                        onClick={() => loadFile(file, 'test')}
+                        className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-zinc-800"
+                        title="Test this file"
+                      >
+                        Test
+                      </button>
+                      <button
+                        onClick={() => loadFile(file, 'use')}
+                        className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-zinc-800"
+                        title="Export to AI tools"
+                      >
+                        Export
+                      </button>
                       <button
                         onClick={() => {
                           const blob = new Blob([file.content], { type: 'text/markdown' })
@@ -388,14 +434,15 @@ export default function HistoryPage() {
                           URL.revokeObjectURL(url)
                         }}
                         className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-zinc-800"
+                        title="Download as CLAUDE.md"
                       >
-                        ↓ Download
+                        ↓
                       </button>
                       <button
                         onClick={() => setExpanded(expanded === file.id ? null : file.id)}
                         className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-zinc-800"
                       >
-                        {expanded === file.id ? 'Hide ↑' : 'View ↓'}
+                        {expanded === file.id ? '↑' : '↓ View'}
                       </button>
                     </div>
                   </div>

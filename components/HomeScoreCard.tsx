@@ -69,8 +69,8 @@ export function HomeScoreCard() {
         {isReal ? (
           <>
             <span className="text-xs text-zinc-400 font-medium">Your last score</span>
-            <Link href="/score" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
-              Score again →
+            <Link href="/score?restore=1" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+              Continue →
             </Link>
           </>
         ) : (

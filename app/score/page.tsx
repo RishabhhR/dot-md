@@ -143,6 +143,25 @@ export default function ScorePage() {
     if (voiceTranscript && inputMode === 'voice') setContent(voiceTranscript)
   }, [voiceTranscript, inputMode])
 
+  // Restore previous session when ?restore=1 is in the URL
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('restore') !== '1') return
+    try {
+      const storedContent = localStorage.getItem('contextual_labs_last_content')
+      const storedResult  = localStorage.getItem('contextual_labs_last_score_full')
+      if (storedContent) setContent(storedContent)
+      if (storedResult) {
+        const result = JSON.parse(storedResult) as ScoreResult
+        setScoreResult(result)
+        setPhase('scored')
+        setTimeout(() => setAnimate(true), 50)
+      }
+    } catch { /* ignore */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -180,6 +199,7 @@ export default function ScorePage() {
           improvements: data.top_improvements?.length ?? 0,
         }))
         localStorage.setItem('contextual_labs_last_content', finalContent)
+        localStorage.setItem('contextual_labs_last_score_full', JSON.stringify(data))
       } catch { /* ignore */ }
       // Save to DB (non-blocking)
       fetch('/api/history', {
@@ -496,7 +516,7 @@ export default function ScorePage() {
                 href="/use"
                 className="flex items-center justify-center gap-2 border border-zinc-700 hover:border-zinc-600 text-zinc-400 hover:text-zinc-200 px-5 py-3 rounded-xl font-medium transition-colors"
               >
-                Use your file →
+                Export to your AI tools →
               </Link>
               <button
                 onClick={reset}
