@@ -499,31 +499,33 @@ export default function ScorePage() {
             )}
 
             {/* Actions */}
-            <div className="flex gap-3 flex-wrap">
+            <div className="space-y-3">
               <button
                 onClick={handleOptimize}
-                className="flex-1 bg-violet-600 hover:bg-violet-500 text-white py-3 rounded-xl font-medium transition-colors"
+                className="w-full bg-violet-600 hover:bg-violet-500 text-white py-3 rounded-xl font-medium transition-colors"
               >
                 Optimize My File ↑
               </button>
-              <Link
-                href="/test"
-                className="flex items-center justify-center gap-2 border border-violet-500/40 hover:border-violet-500/70 text-violet-400 hover:text-violet-300 px-5 py-3 rounded-xl font-medium transition-colors"
-              >
-                Test how AI sees you →
-              </Link>
-              <Link
-                href="/use"
-                className="flex items-center justify-center gap-2 border border-zinc-700 hover:border-zinc-600 text-zinc-400 hover:text-zinc-200 px-5 py-3 rounded-xl font-medium transition-colors"
-              >
-                Export to your AI tools →
-              </Link>
-              <button
-                onClick={reset}
-                className="border border-zinc-700 hover:border-zinc-600 text-zinc-400 hover:text-zinc-200 px-5 py-3 rounded-xl font-medium transition-colors"
-              >
-                Start Over
-              </button>
+              <div className="grid grid-cols-3 gap-3">
+                <Link
+                  href="/test"
+                  className="flex items-center justify-center text-center border border-violet-500/40 hover:border-violet-500/70 text-violet-400 hover:text-violet-300 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                >
+                  Test AI response →
+                </Link>
+                <Link
+                  href="/use"
+                  className="flex items-center justify-center text-center border border-zinc-700 hover:border-zinc-600 text-zinc-400 hover:text-zinc-200 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                >
+                  Export to tools →
+                </Link>
+                <button
+                  onClick={reset}
+                  className="border border-zinc-700 hover:border-zinc-600 text-zinc-400 hover:text-zinc-200 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                >
+                  Start Over
+                </button>
+              </div>
             </div>
           </div>
         )}
