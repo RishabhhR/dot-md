@@ -24,7 +24,7 @@ export default function Home() {
               Test
             </Link>
             <Link href="/use" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">
-              Use
+              Export
             </Link>
             <Show when="signed-in">
               <Link href="/history" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">
