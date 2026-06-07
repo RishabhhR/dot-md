@@ -6,27 +6,25 @@ export function Logo({ size = 28 }: { size?: number }) {
       viewBox="0 0 28 28"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="Contextual Labs"
+      aria-label="DotMD"
     >
-      <defs>
-        <linearGradient id="cl-bg" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#5b21b6" />
-          <stop offset="100%" stopColor="#7c3aed" />
-        </linearGradient>
-      </defs>
-      {/* Rounded badge */}
-      <rect width="28" height="28" rx="7" fill="url(#cl-bg)" />
-      {/* Document lines — three rows of text */}
-      <path
-        d="M7 10.5h14M7 14h14M7 17.5h9"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeOpacity="0.95"
-      />
-      {/* Sparkle accent */}
-      <circle cx="21.5" cy="7" r="3" fill="#c4b5fd" />
-      <circle cx="21.5" cy="7" r="1.25" fill="white" />
+      {/* Violet rounded badge */}
+      <rect width="28" height="28" rx="7" fill="#8b5cf6" />
+      {/* The dot — key visual element */}
+      <circle cx="7.5" cy="19.5" r="2.1" fill="white" />
+      {/* "md" lettering */}
+      <text
+        x="19.5"
+        y="21"
+        textAnchor="middle"
+        fill="white"
+        fontFamily="system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+        fontSize="11"
+        fontWeight="800"
+        letterSpacing="-0.4"
+      >
+        md
+      </text>
     </svg>
   )
 }

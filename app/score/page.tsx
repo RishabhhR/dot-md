@@ -149,8 +149,8 @@ export default function ScorePage() {
     const params = new URLSearchParams(window.location.search)
     if (params.get('restore') !== '1') return
     try {
-      const storedContent = localStorage.getItem('contextual_labs_last_content')
-      const storedResult  = localStorage.getItem('contextual_labs_last_score_full')
+      const storedContent = localStorage.getItem('dotmd_last_content')
+      const storedResult  = localStorage.getItem('dotmd_last_score_full')
       if (storedContent) setContent(storedContent)
       if (storedResult) {
         const result = JSON.parse(storedResult) as ScoreResult
@@ -192,14 +192,14 @@ export default function ScorePage() {
       setTimeout(() => setAnimate(true), 50)
       // Persist for homepage card + test page
       try {
-        localStorage.setItem('contextual_labs_last_score', JSON.stringify({
+        localStorage.setItem('dotmd_last_score', JSON.stringify({
           overall: data.overall,
           grade: data.grade,
           dimensions: (data.dimensions ?? []).slice(0, 4).map((d: { name: string; score: number; max: number }) => ({ name: d.name, score: d.score, max: d.max })),
           improvements: data.top_improvements?.length ?? 0,
         }))
-        localStorage.setItem('contextual_labs_last_content', finalContent)
-        localStorage.setItem('contextual_labs_last_score_full', JSON.stringify(data))
+        localStorage.setItem('dotmd_last_content', finalContent)
+        localStorage.setItem('dotmd_last_score_full', JSON.stringify(data))
       } catch { /* ignore */ }
       // Save to DB (non-blocking)
       fetch('/api/history', {
@@ -282,7 +282,7 @@ export default function ScorePage() {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <Logo size={28} />
-            <span className="text-sm font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">Contextual Labs</span>
+            <span className="text-sm font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">DotMD</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/history" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">

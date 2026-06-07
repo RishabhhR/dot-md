@@ -61,7 +61,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
         <div className="max-w-2xl mx-auto">
           <Link href="/" className="flex items-center gap-2 w-fit group">
             <Logo size={24} />
-            <span className="text-xs font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">Contextual Labs</span>
+            <span className="text-xs font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">DotMD</span>
           </Link>
         </div>
       </div>
@@ -187,7 +187,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
             <p className="text-center text-xs text-zinc-700 pb-8">
               Powered by{' '}
               <Link href="/" className="text-zinc-600 hover:text-zinc-400 transition-colors">
-                Contextual Labs
+                DotMD
               </Link>
             </p>
           </>

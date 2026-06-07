@@ -45,7 +45,7 @@ export function HomeScoreCard() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('contextual_labs_last_score')
+      const raw = localStorage.getItem('dotmd_last_score')
       if (raw) {
         const parsed = JSON.parse(raw) as StoredScore
         if (parsed?.overall) {

@@ -91,7 +91,7 @@ export default function ExportPage() {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('contextual_labs_last_content')
+      const stored = localStorage.getItem('dotmd_last_content')
       if (stored?.trim()) setContent(stored)
     } catch { /* ignore */ }
   }, [])
@@ -155,7 +155,7 @@ export default function ExportPage() {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <Logo size={28} />
-            <span className="text-sm font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">Contextual Labs</span>
+            <span className="text-sm font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">DotMD</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/score" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">Score</Link>

@@ -7,7 +7,7 @@ const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Contextual Labs — Score, Build & Optimize Your AI Context File',
+  title: 'DotMD — Score, Build & Optimize Your AI Context File',
   description:
     'Your .md file is your resume. Score it, build it from scratch, or optimize it with AI. Most people are leaving 70% of AI productivity on the table.',
 }

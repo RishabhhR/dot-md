@@ -213,12 +213,12 @@ export default function HistoryPage() {
   // Load a history file back into the app, then navigate to the target page
   const loadFile = (file: MdFile, dest: 'score' | 'test' | 'use') => {
     try {
-      localStorage.setItem('contextual_labs_last_content', file.content)
+      localStorage.setItem('dotmd_last_content', file.content)
       if (file.score_json) {
         try {
           const parsed = JSON.parse(file.score_json)
-          localStorage.setItem('contextual_labs_last_score_full', file.score_json)
-          localStorage.setItem('contextual_labs_last_score', JSON.stringify({
+          localStorage.setItem('dotmd_last_score_full', file.score_json)
+          localStorage.setItem('dotmd_last_score', JSON.stringify({
             overall: parsed.overall,
             grade: parsed.grade,
             dimensions: (parsed.dimensions ?? []).slice(0, 4).map((d: { name: string; score: number; max: number }) => ({ name: d.name, score: d.score, max: d.max })),
@@ -258,7 +258,7 @@ export default function HistoryPage() {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <Logo size={28} />
-            <span className="text-sm font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">Contextual Labs</span>
+            <span className="text-sm font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">DotMD</span>
           </Link>
           <div className="flex items-center gap-5">
             <Link href="/score" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">Score</Link>

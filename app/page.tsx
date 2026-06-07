@@ -11,7 +11,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <Logo size={28} />
-            <span className="text-sm font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">Contextual Labs</span>
+            <span className="text-sm font-semibold text-violet-400 tracking-wide group-hover:text-violet-300 transition-colors">DotMD</span>
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/score" className="text-sm text-zinc-400 hover:text-zinc-50 transition-colors">
@@ -87,7 +87,7 @@ export default function Home() {
       <section className="max-w-6xl mx-auto px-6 py-16 border-t border-zinc-900">
         <h2 className="text-2xl font-semibold text-center mb-3">Three tools, one goal</h2>
         <p className="text-zinc-400 text-center mb-12 max-w-lg mx-auto">
-          Whether you have an existing file or are starting from zero, Contextual Labs meets you where you are.
+          Whether you have an existing file or are starting from zero, DotMD meets you where you are.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
@@ -193,7 +193,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-zinc-900 px-6 py-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between text-zinc-600 text-sm">
-          <span className="text-violet-400/60 font-medium">Contextual Labs</span>
+          <span className="text-violet-400/60 font-medium">DotMD</span>
           <span>Nothing is stored. Privacy first.</span>
         </div>
       </footer>
