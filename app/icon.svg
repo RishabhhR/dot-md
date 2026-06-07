@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="8" fill="#8b5cf6"/>
-  <circle cx="8.5" cy="22" r="2.4" fill="white"/>
-  <text x="22" y="23.5" text-anchor="middle" fill="white"
+  <circle cx="8.5" cy="16" r="2.4" fill="white"/>
+  <text x="22" y="16" text-anchor="middle" dominant-baseline="central" fill="white"
     font-family="system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
     font-size="13" font-weight="800" letter-spacing="-0.5">md</text>
 </svg>
