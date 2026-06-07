@@ -4,6 +4,7 @@ import {
   buildGuidedMessages,
   buildVoiceMessages,
   buildLinkedinMessages,
+  buildCvMessages,
   suggestMessages,
 } from '@/lib/prompts'
 import type { BuildRequest } from '@/lib/types'
@@ -45,6 +46,13 @@ export async function POST(req: NextRequest) {
             ? linkedin_text
             : { pasteText: linkedin_paste, pdfText: linkedin_pdf_text, scrapedProfile: linkedin_profile, scrapedPosts: linkedin_posts }
         )
+        break
+      }
+      case 'cv': {
+        if (!body.cv_text?.trim()) {
+          return NextResponse.json({ error: 'cv_text required for cv mode.' }, { status: 400 })
+        }
+        messages = buildCvMessages(body.cv_text)
         break
       }
       case 'suggest': {

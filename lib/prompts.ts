@@ -152,6 +152,40 @@ Return JSON:
   ]
 }
 
+export function buildCvMessages(cvText: string): Message[] {
+  return [
+    {
+      role: 'system',
+      content:
+        'You are an expert at writing AI context files (CLAUDE.md) from CVs and resumes. ' +
+        'Extract professional context — role, skills, domain expertise, work patterns — and generate a well-structured context file. Return ONLY valid JSON.',
+    },
+    {
+      role: 'user',
+      content: `Convert this CV / resume into a comprehensive CLAUDE.md context file:
+
+<cv>
+${cvText.slice(0, 7000)}
+</cv>
+
+Instructions:
+- **Identity & Role**: Use their most recent role and industry as the primary framing.
+- **Technical Context**: Extract every tool, language, framework, platform, or technology mentioned — even ones listed in skills sections.
+- **Domain Expertise**: Identify deep specialty areas based on tenure, job titles, and project descriptions. Be specific (e.g. "distributed payments systems" not just "backend").
+- **Communication Style**: Infer from seniority, industry, and any writing samples present. Default to clear and direct if nothing is explicit. Add placeholder for user to customize.
+- **Work Patterns**: Infer from scope of past roles — team sizes, cross-functional collaboration, solo vs. team delivery.
+- **Goals & Priorities**: Infer from career arc and recent role. Add placeholder prompts for the user to fill in.
+- **Constraints**: Add a placeholder section with example constraints for the user to fill in.
+- **Collaboration Style**: Add a placeholder section with sensible defaults based on seniority.
+
+Write in first person. Be specific — use exact role titles, company types, years, and technologies from the CV. Do not hallucinate details not present in the document. Add clear "TODO: customize this" notes where information isn't available.
+
+Return JSON:
+{"markdown": "<complete markdown file content>"}`,
+    },
+  ]
+}
+
 export function suggestMessages(step: string, answers: Record<string, string>): Message[] {
   const context = Object.entries(answers)
     .filter(([k]) => k !== step)

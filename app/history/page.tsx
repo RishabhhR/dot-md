@@ -56,6 +56,7 @@ function sourceLabel(source: string) {
     guided: 'Guided',
     voice: 'Voice',
     linkedin: 'LinkedIn',
+    cv: 'CV Upload',
     paste: 'Pasted',
     upload: 'Uploaded',
     optimized: 'Optimized',

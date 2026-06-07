@@ -15,10 +15,12 @@ export interface ScoreResult {
 }
 
 export interface BuildRequest {
-  mode: 'guided' | 'voice' | 'linkedin' | 'suggest'
+  mode: 'guided' | 'voice' | 'linkedin' | 'cv' | 'suggest'
   answers?: Record<string, string>
   step?: string
   transcript?: string
+  // CV / resume
+  cv_text?: string
   // legacy single-field (kept for backward compat)
   linkedin_text?: string
   // new multi-source fields

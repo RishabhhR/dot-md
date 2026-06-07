@@ -6,7 +6,7 @@ import { Show, SignInButton, UserButton } from '@clerk/nextjs'
 import { Logo } from '@/components/Logo'
 import { useVoiceRecorder, formatTime } from '@/hooks/useVoiceRecorder'
 
-type BuildPhase = 'mode' | 'guided' | 'voice' | 'linkedin' | 'generating' | 'result'
+type BuildPhase = 'mode' | 'guided' | 'voice' | 'linkedin' | 'cv' | 'generating' | 'result'
 
 const STEPS = [
   {
@@ -97,6 +97,9 @@ export default function BuildPage() {
   const [linkedinPdfExtracting, setLinkedinPdfExtracting] = useState(false)
   const [linkedinCookie, setLinkedinCookie] = useState('')
   const [linkedinProfileUrl, setLinkedinProfileUrl] = useState('')
+  const [cvText, setCvText] = useState('')
+  const [cvPdfFile, setCvPdfFile] = useState<File | null>(null)
+  const [cvPdfExtracting, setCvPdfExtracting] = useState(false)
   const [isSuggesting, setIsSuggesting] = useState(false)
   const [generatedMarkdown, setGeneratedMarkdown] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -165,6 +168,52 @@ export default function BuildPage() {
       setLinkedinPdfText('')
     } finally {
       setLinkedinPdfExtracting(false)
+    }
+  }
+
+  const handleCvPdfUpload = async (file: File) => {
+    setCvPdfFile(file)
+    setCvPdfExtracting(true)
+    setError(null)
+    try {
+      const fd = new FormData()
+      fd.append('pdf', file)
+      const res = await fetch('/api/linkedin-pdf', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'PDF extraction failed')
+      setCvText(data.text ?? '')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to read PDF')
+      setCvPdfFile(null)
+      setCvText('')
+    } finally {
+      setCvPdfExtracting(false)
+    }
+  }
+
+  const generateCv = async () => {
+    if (!cvText.trim()) return
+    setPhase('generating')
+    setError(null)
+    try {
+      const res = await fetch('/api/build', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'cv', cv_text: cvText }),
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Generation failed')
+      if (!result.markdown) throw new Error('No content generated')
+      setGeneratedMarkdown(result.markdown)
+      setPhase('result')
+      fetch('/api/history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: result.markdown, source: 'cv' }),
+      }).catch(() => {})
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setPhase('cv')
     }
   }
 
@@ -281,6 +330,9 @@ export default function BuildPage() {
     setLinkedinPdfExtracting(false)
     setLinkedinCookie('')
     setLinkedinProfileUrl('')
+    setCvText('')
+    setCvPdfFile(null)
+    setCvPdfExtracting(false)
     setGeneratedMarkdown('')
     setError(null)
     resetRecorder()
@@ -352,6 +404,14 @@ export default function BuildPage() {
                   desc: 'Copy your LinkedIn profile text and paste it below. AI extracts your role, skills, and expertise to build your file.',
                   badge: 'Zero effort',
                   badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                },
+                {
+                  icon: '📄',
+                  mode: 'cv' as const,
+                  title: 'Upload CV / Resume',
+                  desc: 'Drop in your CV or resume as a PDF or paste the text. AI extracts your work history, skills, and expertise — no questions asked.',
+                  badge: 'Unguided',
+                  badgeColor: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
                 },
               ].map((opt) => (
                 <button
@@ -702,6 +762,120 @@ export default function BuildPage() {
             </div>
           )
         })()}
+
+        {/* CV MODE */}
+        {phase === 'cv' && (
+          <div className="max-w-2xl mx-auto">
+            <button onClick={() => setPhase('mode')} className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-8">
+              ← Back
+            </button>
+            <h2 className="text-2xl font-bold mb-2">Upload CV / Resume</h2>
+            <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
+              Upload your CV as a PDF or paste the text directly. AI will extract your work history, skills, and expertise
+              to generate a personalized CLAUDE.md — no guided questions needed.
+            </p>
+
+            {/* PDF upload zone */}
+            <div className="mb-5 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-zinc-800 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-zinc-200">Upload PDF</span>
+                  <span className="text-xs text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 rounded-full">Recommended</span>
+                </div>
+                {cvPdfFile && !cvPdfExtracting && cvText && (
+                  <span className="text-xs text-emerald-400">✓ Extracted</span>
+                )}
+              </div>
+              <div className="px-5 py-4">
+                <label
+                  className="block cursor-pointer"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    const file = e.dataTransfer.files[0]
+                    if (file?.type === 'application/pdf') handleCvPdfUpload(file)
+                  }}
+                >
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleCvPdfUpload(file)
+                    }}
+                  />
+                  <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+                    cvPdfFile && cvText
+                      ? 'border-emerald-500/40 bg-emerald-500/5'
+                      : 'border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800/30'
+                  }`}>
+                    {cvPdfExtracting ? (
+                      <div className="flex items-center justify-center gap-2 text-sm text-zinc-400">
+                        <div className="w-4 h-4 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+                        Reading your CV…
+                      </div>
+                    ) : cvPdfFile && cvText ? (
+                      <div className="text-sm text-emerald-400">
+                        ✓ {cvPdfFile.name} — {cvText.split(/\s+/).filter(Boolean).length.toLocaleString()} words extracted
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="text-2xl mb-2">📄</div>
+                        <div className="text-sm text-zinc-400">
+                          <span className="text-zinc-200 font-medium">Click to upload</span> or drag &amp; drop
+                        </div>
+                        <div className="text-xs text-zinc-600 mt-1">PDF format · Any CV or resume</div>
+                      </div>
+                    )}
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Paste fallback */}
+            <div className="mb-8 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-zinc-800 flex items-center gap-2">
+                <span className="text-sm font-medium text-zinc-200">Or paste text</span>
+                <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded-full">Alternative</span>
+              </div>
+              <div className="px-5 py-4">
+                <textarea
+                  value={cvPdfFile ? '' : cvText}
+                  onChange={(e) => {
+                    setCvPdfFile(null)
+                    setCvText(e.target.value)
+                  }}
+                  disabled={!!cvPdfFile}
+                  placeholder={cvPdfFile ? 'PDF already loaded — remove it to paste manually' : 'Paste your CV or resume text here…'}
+                  className="w-full h-36 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 resize-none focus:outline-none focus:border-sky-500/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                />
+                {cvPdfFile && (
+                  <button
+                    onClick={() => { setCvPdfFile(null); setCvText('') }}
+                    className="mt-2 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    ✕ Remove PDF and paste manually
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {error && (
+              <div className="mb-4 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-400">
+                {error}
+              </div>
+            )}
+
+            <button
+              onClick={generateCv}
+              disabled={!cvText.trim() || cvPdfExtracting}
+              className="w-full bg-sky-600 hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed text-white py-3 rounded-xl font-medium transition-colors"
+            >
+              Generate My File →
+            </button>
+          </div>
+        )}
 
         {/* GENERATING LOADER */}
         {phase === 'generating' && (
