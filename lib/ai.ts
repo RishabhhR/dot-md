@@ -11,7 +11,7 @@ interface LLMResult {
 
 async function callGroq(messages: Message[], timeoutMs = 25000): Promise<LLMResult> {
   const apiKey = process.env.GROQ_API_KEY
-  const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+  const model = process.env.GROQ_MODEL || 'openai/gpt-oss-20b'
   if (!apiKey) return { offline: true, content: '' }
 
   const controller = new AbortController()
@@ -21,7 +21,11 @@ async function callGroq(messages: Message[], timeoutMs = 25000): Promise<LLMResu
     const res = await fetch(GROQ_URL, {
       method: 'POST',
       signal: controller.signal,
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'contextual-labs/1.0',
+      },
       body: JSON.stringify({
         model,
         messages,
@@ -122,7 +126,7 @@ export async function callGroqFreeform(
   timeoutMs = 30000
 ): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY
-  const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+  const model = process.env.GROQ_MODEL || 'openai/gpt-oss-20b'
   if (!apiKey) throw new Error('GROQ_API_KEY not set')
 
   const messages: Message[] = []
@@ -136,7 +140,11 @@ export async function callGroqFreeform(
     const res = await fetch(GROQ_URL, {
       method: 'POST',
       signal: controller.signal,
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'contextual-labs/1.0',
+      },
       body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: 800 }),
     })
     clearTimeout(timer)
